@@ -9,7 +9,7 @@ defmodule Speakeasy.Authentication do
 
   @behaviour Absinthe.Middleware
 
-  def call(resolution, opts \\ []) do
+  def call(%{state: :unresolved} = resolution, opts) do
     options = Keyword.merge([user_key: :current_user], opts)
     case Map.has_key?(resolution.context, options[:user_key]) do
       true ->
@@ -20,4 +20,6 @@ defmodule Speakeasy.Authentication do
         |> Absinthe.Resolution.put_result({:error, "unauthenticated"})
     end
   end
+
+  def call(resolution, _), do: resolution
 end

@@ -7,7 +7,7 @@ defmodule Speakeasy.Authorization do
 
   @behaviour Absinthe.Middleware
 
-  def call(resolution, _config) do
+  def call(%{state: :unresolved} = resolution, _config) do
     schema = resolution.schema
     identifier = resolution.definition.schema_node.identifier
     context = resolution.context
@@ -20,6 +20,8 @@ defmodule Speakeasy.Authorization do
       {:error, reason} -> Absinthe.Resolution.put_result(resolution, {:error, reason})
     end
   end
+
+  def call(resolution, _), do: resolution
 
   defp resolve_result(true), do: :ok
   defp resolve_result(:ok), do: :ok

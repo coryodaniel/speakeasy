@@ -12,7 +12,7 @@ defmodule Speakeasy.AuthorizationTest do
       },
       context: %{},
       arguments: %{},
-      state: :pending,
+      state: :unresolved,
       errors: []
     }
   end
