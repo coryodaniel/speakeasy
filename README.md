@@ -28,7 +28,7 @@ Policies are just regular [Bodyguard](https://github.com/schrockwell/bodyguard) 
 defmodule MyAppWeb.Schema do
   use Absinthe.Schema
 
-  def authorize(:create_post, %{current_user: user} = context, post) do
+  def authorize(:create_post, %{current_user: user} = gql_context, post) do
     IO.inspect(user)
     IO.inspect(context)
 
@@ -48,7 +48,7 @@ Below is an example of adding authentication and authorization to a GraphQL fiel
 defmodule MyAppWeb.Schema do
   use Absinthe.Schema
 
-  def authorize(:create_post, _context, _args) do
+  def authorize(:create_post, gql_context, post) do
     # Return :ok or true to permit
     # Return :error, {:error, reason}, or false to deny
   end
@@ -65,8 +65,8 @@ defmodule MyAppWeb.Schema do
       arg(:title, non_null(:string))
       arg(:body, non_null(:string))
 
-      resolve(fn _, args, _ ->
-        MyApp.Posts.create_post(args)
+      resolve(fn _, args, %{context: %{current_user: user}} ->
+        MyApp.Posts.create_post(args, user)
       end)
     end
   end
@@ -77,7 +77,7 @@ Alternatively you can use `defdelegate` to separate your schema and policy code:
 
 ```elixir
 defmodule MyAppWeb.Schema.Policy do
-  def authorize(:create_post, _context, _args) do
+  def authorize(:create_post, gql_context, post) do
     # Return :ok or true to permit
     # Return :error, {:error, reason}, or false to deny
   end
@@ -96,8 +96,8 @@ defmodule MyAppWeb.Schema do
       arg(:title, non_null(:string))
       arg(:body, non_null(:string))
 
-      resolve(fn _, args, _ ->
-        MyApp.Posts.create_post(args)
+      resolve(fn _, args, %{context: %{current_user: user}} ->
+        MyApp.Posts.create_post(args, user)
       end)
     end
   end
@@ -105,3 +105,46 @@ end
 ```
 
 Check out the [documentation](https://hexdocs.pm/absinthe/Absinthe.Middleware.html) for more details on how to use Absinthe middleware.
+
+### `Speakeasy.resolve/2` or `Speakeasy.resolve!/2`
+
+If you don't like the idea of defining your policies at the schema level, you can use `Speakeasy.resolve/2` or `Speakeasy.resolve!/2` in line with your field's resolve function and define policies on your bounded contexts instead.
+
+```elixir
+defmodule MyApp.Posts do
+  def authorize(:create_post, graphql_context, args) do
+    # Return :ok or true to permit
+    # Return :error, {:error, reason}, or false to deny
+  end
+
+  def create_post(post, user) do
+    # Your logic here.
+  end
+end
+
+defmodule MyAppWeb.Schema do
+  use Absinthe.Schema
+
+  mutation do
+    @desc "Create a post"
+    field :create_post, type: :post do
+      # If the arity of `:create_post` is 2, it will receive the `post` arguments and the graphql `context`
+      resolve(Speakeasy.resolve(MyApp.Posts, :create_post))
+
+      # If you want to receive the `user` instead, pass `user_key: :the_key_you_stored_your_user_under`
+      # resolve(Speakeasy.resolve(MyApp.Posts, :create_post, user_key: :current_user))
+
+      # Alternatively `resolve!/2` can be used for compile time checking that your resolution function supports the correct arity. It also accepts `:user_key`
+      # resolve(Speakeasy.resolve!(MyApp.Posts, :create_post))
+    end
+  end
+end
+```
+
+If authorized `resolve/2` and `resolve!/2` will return an anonymous function to Absinthe's `resolve` function wrapping your resolution function (`MyApp.Posts.create_post` above).
+
+Speakeasy will provide different arguments depending on your resolution functions arity. For example:
+
+- `MyApp.Posts.list_post/0` - speakeasy will simply call this function
+- `MyApp.Posts.create_post/1` - speakeasy will call this function passing the GraphQL arguments
+- `MyApp.Posts.create_post/2` - speakeasy will call this function passing the GraphQL arguments as the first parameter and the GraphQL `context` _or_ `user` as the second depending on if `user_key` was provided.
