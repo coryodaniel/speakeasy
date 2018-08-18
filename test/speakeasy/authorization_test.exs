@@ -1,6 +1,6 @@
-defmodule Speakeasy.Middleware.AuthorizationTest do
+defmodule Speakeasy.AuthorizationTest do
   use ExUnit.Case
-  alias Speakeasy.Middleware.Authorization
+  alias Speakeasy.Authorization
 
   def mock_resolution(identifier) do
     %{

@@ -1,4 +1,4 @@
-defmodule Speakeasy.Middleware.Authentication do
+defmodule Speakeasy.Authentication do
   @moduledoc """
   Authentication middleware for Absinthe schemas or fields.
 
@@ -9,8 +9,9 @@ defmodule Speakeasy.Middleware.Authentication do
 
   @behaviour Absinthe.Middleware
 
-  def call(resolution, user_key \\ :current_user) do
-    case Map.has_key?(resolution.context, user_key) do
+  def call(resolution, opts \\ []) do
+    options = Keyword.merge([user_key: :current_user], opts)
+    case Map.has_key?(resolution.context, options[:user_key]) do
       true ->
         resolution
 

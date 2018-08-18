@@ -1,4 +1,4 @@
-defmodule Speakeasy.Middleware.Authorization do
+defmodule Speakeasy.Authorization do
   @moduledoc """
   Authorization middleware for Absinthe schemas or fields.
 

@@ -1,4 +1,4 @@
-defmodule Speakeasy.Middleware.AuthenticationTest do
+defmodule Speakeasy.AuthenticationTest do
   use ExUnit.Case
 
   test "authenticates and returns the resolution when there is a user context present" do
@@ -8,7 +8,7 @@ defmodule Speakeasy.Middleware.AuthenticationTest do
       }
     }
 
-    assert resolution == Speakeasy.Middleware.Authentication.call(resolution)
+    assert resolution == Speakeasy.Authentication.call(resolution)
   end
 
   test "given an alternate user key, authenticates and returns the resolution when there is a user context present" do
@@ -18,13 +18,13 @@ defmodule Speakeasy.Middleware.AuthenticationTest do
       }
     }
 
-    assert resolution == Speakeasy.Middleware.Authentication.call(resolution, :user)
+    assert resolution == Speakeasy.Authentication.call(resolution, [user_key: :user])
   end
 
   test "returns an 'unauthorized' error when there is no user context" do
     resolution = %{context: %{}, errors: [], state: :pending}
 
-    result = Speakeasy.Middleware.Authentication.call(resolution)
+    result = Speakeasy.Authentication.call(resolution)
     assert result == %{context: %{}, errors: ["unauthenticated"], state: :resolved}
   end
 end

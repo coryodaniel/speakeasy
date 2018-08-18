@@ -59,7 +59,7 @@ defmodule MyAppWeb.Schema do
       middleware(Speakeasy.Authentication)
       # Optionally you can pass an atom as the second argument to
       # set the name of the key to use for checking the current user. The default is `:current_user`
-      # middleware(Speakeasy.Authentication, :current_user)
+      # middleware(Speakeasy.Authentication, user_key: :current_user)
       middleware(Speakeasy.Authorization)
 
       arg(:title, non_null(:string))
@@ -105,31 +105,3 @@ end
 ```
 
 Check out the [documentation](https://hexdocs.pm/absinthe/Absinthe.Middleware.html) for more details on how to use Absinthe middleware.
-
-### `Speakeasy.resolve/2` or `Speakeasy.resolve!/2`
-
-Speakeasy also includes a function and a macro that can be used in line with your field's resolve function if using the middleware doesn't suite your needs:
-
-```elixir
-defmodule MyAppWeb.Schema do
-  use Absinthe.Schema
-
-  mutation do
-    @desc "Create a post"
-    field :create_post, type: :post do
-      resolve(Speakeasy.resolve(MyApp.Posts, :create_post))
-
-      # or alternatively `resolve!/2` for compile time checking that your resolution function supports the correct arity.
-      # resolve(Speakeasy.resolve!(MyApp.Posts, :create_post))
-    end
-  end
-end
-```
-
-If authorized `resolve/2` and `resolve!/2` will return an anonymous function to Absinthe's `resolve` function wrapping your resolution function (`MyApp.Posts.create_post` above).
-
-Speakeasy will provide different arguments depending on your resolution functions arity. For example:
-
-- `MyApp.Posts.list_post/0` - speakeasy will simply call this function
-- `MyApp.Posts.create_post/1` - speakeasy will call this function passing the GraphQL arguments
-- `MyApp.Posts.create_post/2` - speakeasy will call this function passing the GraphQL arguments as the first parameter and the GraphQL context as the second.
