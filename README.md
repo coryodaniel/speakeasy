@@ -10,7 +10,7 @@ by adding `speakeasy` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:speakeasy, "~> 0.1.0"}
+    {:speakeasy, "~> 0.2.1"}
   ]
 end
 ```
