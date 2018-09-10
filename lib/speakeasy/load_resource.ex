@@ -1,11 +1,10 @@
 defmodule Speakeasy.LoadResource do
   @moduledoc """
-  This middleware will take the result of this context and put it in ctx[:speakeasy][:resource]
+  Loads a resource into the speakeasy context:
 
-  ## Examples
-      middleware(Speakeasy.LoadResource, fn(attrs) -> &MyApp.get_album/1 end))
-      middleware(Speakeasy.LoadResource, fn(attrs, user) -> &MyApp.get_album/2 end))
-      middleware(Speakeasy.LoadResourceById, &MyApp.get_album/1) call LoadResource under the hood
+  ```
+  %Absinthe.Resolution{context: %{speakeasy: %Speakeasy.Context{resource: your_resource}}}
+  ```
 
   See the [README](readme.html) for a complete example in a Absinthe Schema.
   """
@@ -16,13 +15,36 @@ defmodule Speakeasy.LoadResource do
     defexception [:message, :ref]
   end
 
-  # @spec call(map(), fun() | keyword())
   @doc """
-  Excepts a return of {:ok, resource} | {:error, reason}
 
-  Throws:
-  * UnexpectedLoadingResponse
+  Handles loading a resource or resources and storing them in the `Speakeasy.Context` for later resolving.
+
+  Callback functions must return a type of: `any | {:ok, any} | {:error, error} | nil`
+
+  ## Examples
+    Loading a resource with a 1-arity function will receive the Absinthe arguments:
+
+      object :post_mutations do
+        @desc "Create post"
+        field :create_post, type: :post do
+          arg(:name, non_null(:string))
+          middleware(Speakeasy.Authn)
+          middleware(Speakeasy.LoadResource, fn(attrs) -> MyApp.Posts.create_post(attrs) end)
+        end
+      end
+
+    Loading a resource with a 2-arity function will receive the Absinthe arguments and the `SpeakEasy` current user:
+
+      object :post_mutations do
+        @desc "Create post"
+        field :create_post, type: :post do
+          arg(:name, non_null(:string))
+          middleware(Speakeasy.Authn)
+          middleware(Speakeasy.LoadResource, fn(attrs, user) -> MyApp.Posts.create_post(attrs, user) end)
+        end
+      end
   """
+  @impl true
   def call(%{state: :unresolved} = res, fun) when is_function(fun), do: call(res, loader: fun)
 
   def call(%{state: :unresolved} = res, opts) when is_list(opts) do
@@ -40,6 +62,9 @@ defmodule Speakeasy.LoadResource do
 
       {:error, reason} ->
         Absinthe.Resolution.put_result(res, {:error, reason})
+
+      nil ->
+        Absinthe.Resolution.put_result(res, {:error, :not_found})
 
       ref ->
         raise UnexpectedLoadingResponse,

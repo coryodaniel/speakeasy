@@ -10,7 +10,7 @@ defmodule Speakeasy.Authz do
   @doc """
   Authorizes the operation using [Bodyguard](https://github.com/schrockwell/bodyguard) policies.
 
-  `Speakeasy.Authn` must occur before calling `Authz`
+  `Speakeasy.Authn` and `Speakeasy.LoadResource` must occur before calling `Authz`
 
   Covering policies is beyond the scope of these docs, but a simple example is below:
       defmodule MyApp.Posts do
@@ -39,6 +39,7 @@ defmodule Speakeasy.Authz do
         field :create_post, type: :post do
           arg(:name, non_null(:string))
           middleware(Speakeasy.Authn)
+          middleware(Speakeasy.LoadResource, fn(attrs) -> a_function_that_loads_the_resource end)
           middleware(Speakeasy.Authz, {MyApp.Posts, :create_post})
         end
       end
