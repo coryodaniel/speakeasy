@@ -22,10 +22,9 @@ defmodule Speakeasy do
   def resolve(mod, fun, opts \\ []) do
     fn _parent, args, res ->
       gql_context = res.context || %{}
-      case Bodyguard.permit(mod, fun, gql_context, args) do
-        :ok ->
-          ctx = context_or_user(gql_context, opts)
-          send(mod, fun, ctx, args)
+      ctx_or_user = context_or_user(gql_context, opts)
+      case Bodyguard.permit(mod, fun, ctx_or_user, args) do
+        :ok -> send(mod, fun, ctx_or_user, args)
         :error -> {:error, "Unauthorized"}
         {:error, reason} -> {:error, reason}
       end

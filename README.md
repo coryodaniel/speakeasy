@@ -134,6 +134,9 @@ defmodule MyAppWeb.Schema do
       # If you want to receive the `user` instead, pass `user_key: :the_key_you_stored_your_user_under`
       # resolve(Speakeasy.resolve(MyApp.Posts, :create_post, user_key: :current_user))
 
+      # A convience atom is accepted `:user` that will default to returning the value of the context's `:current_user`
+      # resolve(Speakeasy.resolve(MyApp.Posts, :create_post, :user))
+
       # Alternatively `resolve!/2` can be used for compile time checking that your resolution function supports the correct arity. It also accepts `:user_key`
       # resolve(Speakeasy.resolve!(MyApp.Posts, :create_post))
     end
