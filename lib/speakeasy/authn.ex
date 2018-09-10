@@ -10,7 +10,6 @@ defmodule Speakeasy.Authn do
   @doc """
   Considers the context authenticated if a non-null value is exists under `:user_key` in the `Absinthe.Resolution` `:context`
 
-
   ## Examples
     `:user_key` and `:authn_error_message` can be set globally and be overwritten per middleware call:
 

@@ -3,13 +3,47 @@ defmodule Speakeasy.Authz do
   Authorization middleware for Absinthe.
 
   Please see the [README](readme.html) for a complete example in a Absinthe Schema.
-
-  middleware(Speakeasy.Authz, authorizer: Module.Name, message: fn(_ctx) -> "Error message" end)
-  middleware(Speakeasy.Authz, Module.Name)
   """
 
   @behaviour Absinthe.Middleware
 
+  @doc """
+  Authorizes the operation using [Bodyguard](https://github.com/schrockwell/bodyguard) policies.
+
+  `Speakeasy.Authn` must occur before calling `Authz`
+
+  Covering policies is beyond the scope of these docs, but a simple example is below:
+      defmodule MyApp.Posts do
+        defdelegate authorize(action, user, params), to: MyApp.Posts.Policy
+      end
+
+      defmodule MyApp.Posts.Policy do
+        @behaviour Bodyguard.Policy
+
+        @spec authorize(atom(), %User{} | nil, map()) :: :ok | {:error, String.t()}
+        # Allow any user to create a post
+        def authorize(:create_post, %User{}, _params), do: true
+
+        # Only allow an author to get a post in draft state
+        def authorize(:get_post, %User{id: user_id}, %Post{user_id: user_id, draft: true}), do: true
+
+        # Default blacklist
+        def authorize(_, _, _), do: {:error, "Get outta here fool!"}
+      end
+
+  ## Examples
+    Authorizing takes a tuple of `{resource_module, action}`:
+
+      object :post_mutations do
+        @desc "Create post"
+        field :create_post, type: :post do
+          arg(:name, non_null(:string))
+          middleware(Speakeasy.Authn)
+          middleware(Speakeasy.Authz, {MyApp.Posts, :create_post})
+        end
+      end
+  """
+  @impl true
   def call(%{state: :unresolved} = res, {m, f}), do: call(res, authorizer: {m, f})
 
   def call(%{state: :unresolved} = res, opts) when is_list(opts) do
