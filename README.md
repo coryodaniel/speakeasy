@@ -22,26 +22,28 @@ Configuration can be done in each Absinthe middleware call, but you can set glob
 ```elixir
 config :speakeasy,
   user_key: :current_user,                # the key the current user will be under in the GraphQL context
-  authn_error_message: "Unauthenticated"  # default authentication failure message
+  authn_error_message: :unauthenticated  # default authentication failure message
 ```
 
 _Note:_ no `authz_error_message` is provided because it is set from Bodyguard.
 
 ## Usage
 
+Show a `posts` schema.
+
 ### Middleware
 
 Speakeasy is a collection of Absinthe middlewares:
 
-#### Speakeasy.Authn
+- [Speakeasy.Authn]()
 
-#### Speakeasy.LoadResource
+- [Speakeasy.LoadResource]()
 
-#### Speakeasy.LoadResourceById
+- [Speakeasy.LoadResourceById]()
 
-#### Speakeasy.AuthZ
+- [Speakeasy.AuthZ]()
 
-#### Speakeasy.Resolve
+- [Speakeasy.Resolve]()
 
 ### Speakeasy.Plug
 

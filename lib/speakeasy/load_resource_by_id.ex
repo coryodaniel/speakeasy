@@ -7,7 +7,7 @@ defmodule Speakeasy.LoadResourceByID do
 
       middleware(Speakeasy.LoadResourceById, &MyApp.get_album/1)
 
-  See the [README](readme.html) for usage.
+  See the [README](readme.html) for a complete example in a Absinthe Schema.
   """
 
   @behaviour Absinthe.Middleware

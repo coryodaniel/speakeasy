@@ -34,7 +34,9 @@ defmodule Speakeasy.AuthnTest do
       state: :unresolved
     }
 
-    %Absinthe.Resolution{context: %{speakeasy: speakeasy}} = Authn.call(resolution, user_key: :user)
+    %Absinthe.Resolution{context: %{speakeasy: speakeasy}} =
+      Authn.call(resolution, user_key: :user)
+
     assert speakeasy == %Speakeasy.Context{resource: nil, user: "chauncy"}
   end
 

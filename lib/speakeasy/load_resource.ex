@@ -7,7 +7,7 @@ defmodule Speakeasy.LoadResource do
       middleware(Speakeasy.LoadResource, fn(attrs, user) -> &MyApp.get_album/2 end))
       middleware(Speakeasy.LoadResourceById, &MyApp.get_album/1) call LoadResource under the hood
 
-  See the [README](readme.html) for usage.
+  See the [README](readme.html) for a complete example in a Absinthe Schema.
   """
 
   @behaviour Absinthe.Middleware
@@ -26,24 +26,20 @@ defmodule Speakeasy.LoadResource do
   def call(%{state: :unresolved} = res, fun) when is_function(fun), do: call(res, loader: fun)
 
   def call(%{state: :unresolved} = res, opts) when is_list(opts) do
-    options = Enum.into(opts, %{user_key: Speakeasy.default_user_key()})
+    options = Enum.into(opts, %{})
     call(res, options)
   end
 
-  def call(%{state: :unresolved, arguments: args, context: ctx} = res, %{
-        user_key: user_key,
-        loader: loader
-      }) do
-    case get_resource(loader, args, ctx[user_key]) do
-      %{} = resource -> Speakeasy.add_resource(res, resource)
+  def call(%{state: :unresolved, arguments: args, context: ctx} = res, %{loader: loader}) do
+    case get_resource(loader, args, ctx[:speakeasy].user) do
+      %{} = resource ->
+        Speakeasy.Context.add_resource(res, resource)
 
-      {:ok, resource} -> Speakeasy.add_resource(res, resource)
+      {:ok, resource} ->
+        Speakeasy.Context.add_resource(res, resource)
 
       {:error, reason} ->
-        Absinthe.Resolution.put_result(
-          res,
-          {:error, reason}
-        )
+        Absinthe.Resolution.put_result(res, {:error, reason})
 
       ref ->
         raise UnexpectedLoadingResponse,

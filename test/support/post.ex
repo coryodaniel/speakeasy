@@ -1,5 +1,5 @@
 defmodule SpeakeasyTest.Post do
-  def authorize(:create_post, "chauncy", _), do: {:error, "No Chauncy's allowed"}
+  def authorize(:create_post, "rupert", _), do: {:error, "No Rupert's allowed"}
   def authorize(:create_post, _, _), do: :ok
 
   def authorize(:list_posts, _, _), do: true
