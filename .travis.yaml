@@ -4,12 +4,13 @@ elixir:
   - 1.7.3
 otp_release:
   - 20.2
-sudo: false
 
 install:
   - mix local.hex --force
   - mix local.rebar --force
   - mix deps.get
+
+script: mix test
 
 # after_script:
 #   - MIX_ENV=docs mix deps.get
