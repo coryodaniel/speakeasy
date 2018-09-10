@@ -35,9 +35,9 @@ defmodule Speakeasy.LoadResource do
         loader: loader
       }) do
     case get_resource(loader, args, ctx[user_key]) do
-      {:ok, resource} ->
-        new_context = Map.put(ctx, :speakeasy, %{resource: resource})
-        Map.put(res, :context, new_context)
+      %{} = resource -> Speakeasy.add_resource(res, resource)
+
+      {:ok, resource} -> Speakeasy.add_resource(res, resource)
 
       {:error, reason} ->
         Absinthe.Resolution.put_result(

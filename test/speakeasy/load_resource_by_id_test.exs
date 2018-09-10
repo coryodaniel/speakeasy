@@ -13,8 +13,8 @@ defmodule Speakeasy.LoadResourceByIDTest do
 
     loader = fn id -> {:ok, "Received ID: #{id}"} end
 
-    %{context: context} = LoadResourceByID.call(resolution, loader)
-    assert context == %{speakeasy: %{resource: "Received ID: 3"}, current_user: "chauncy"}
+    %{context: %{speakeasy: context}} = LoadResourceByID.call(resolution, loader)
+    assert context == %Speakeasy.Context{resource: "Received ID: 3"}
   end
 
   test "updates the resolution's context with the results of loader.(id) when the user is under a different key" do
@@ -28,7 +28,7 @@ defmodule Speakeasy.LoadResourceByIDTest do
 
     loader = fn id -> {:ok, "Received ID: #{id}"} end
 
-    %{context: context} = LoadResourceByID.call(resolution, loader)
-    assert context == %{speakeasy: %{resource: "Received ID: 3"}, user: "chauncy"}
+    %{context: %{speakeasy: context}} = LoadResourceByID.call(resolution, loader: loader, user_key: :user)
+    assert context == %Speakeasy.Context{resource: "Received ID: 3"}
   end
 end

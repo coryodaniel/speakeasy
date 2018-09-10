@@ -15,25 +15,27 @@ defmodule Speakeasy.AuthnTest do
   end
 
   test "authenticates and returns the resolution when there is a user context present" do
-    resolution = %{
+    resolution = %Absinthe.Resolution{
       context: %{
         current_user: "chauncy"
       },
       state: :unresolved
     }
 
-    assert resolution == Authn.call(resolution)
+    %Absinthe.Resolution{context: %{speakeasy: speakeasy}} = Authn.call(resolution)
+    assert speakeasy == %Speakeasy.Context{resource: nil, user: "chauncy"}
   end
 
   test "given an alternate user key, authenticates and returns the resolution when there is a user context present" do
-    resolution = %{
+    resolution = %Absinthe.Resolution{
       context: %{
         user: "chauncy"
       },
       state: :unresolved
     }
 
-    assert resolution == Authn.call(resolution, user_key: :user)
+    %Absinthe.Resolution{context: %{speakeasy: speakeasy}} = Authn.call(resolution, user_key: :user)
+    assert speakeasy == %Speakeasy.Context{resource: nil, user: "chauncy"}
   end
 
   test "returns an ':unauthenticated' error when there is no user context" do
