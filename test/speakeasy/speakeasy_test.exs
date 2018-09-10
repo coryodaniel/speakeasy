@@ -13,6 +13,29 @@ defmodule SpeakeasyTest do
     }
   end
 
+  test "sends arguments and user when the function has an arity of 2 `:user` is provided" do
+    resolver = Speakeasy.resolve(SpeakeasyTest.Post, :method_expecting_user, :user)
+    %{parent: parent, args: args, resolution: resolution} = absinthe_args()
+
+    result = resolver.(parent, args, resolution)
+    assert result.function == "method_expecting_user/2"
+    assert result.args == args
+    assert result.user == resolution.context.current_user
+  end
+
+  test "sends arguments and nil when the function has an arity of 2 and the `:user` and it is not present" do
+    resolver = Speakeasy.resolve(SpeakeasyTest.Post, :method_expecting_user, :user)
+    %{parent: parent, args: args, resolution: _} = absinthe_args()
+
+    # no user
+    resolution = %{context: %{}}
+
+    result = resolver.(parent, args, resolution)
+    assert result.function == "method_expecting_user/2"
+    assert result.args == args
+    assert result.user == nil
+  end
+
   test "sends arguments and user when the function has an arity of 2 and the user_key is provided" do
     resolver = Speakeasy.resolve(SpeakeasyTest.Post, :method_expecting_user, user_key: :current_user)
     %{parent: parent, args: args, resolution: resolution} = absinthe_args()

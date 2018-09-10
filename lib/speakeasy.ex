@@ -10,7 +10,7 @@ defmodule Speakeasy do
   Otherwise returns the Bodyguard error response.
 
   See [this](readme.html#speakeasy-resolve-2-or-speakeasy-resolve-2) section of the README for usage examples.
-  
+
   ## Examples
       iex> Speakeasy.resolve(MyApp.Posts, :create_post)
 
@@ -32,9 +32,10 @@ defmodule Speakeasy do
     end
   end
 
+  defp context_or_user(gql_context, :user), do: context_or_user(gql_context, [user_key: :current_user])
   defp context_or_user(gql_context, []), do: gql_context
   defp context_or_user(gql_context, [user_key: user_key]) do
-    Map.get(gql_context, user_key) || gql_context
+    Map.get(gql_context, user_key) || nil
   end
 
   defp send(mod, fun, context, args) do
