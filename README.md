@@ -1,5 +1,7 @@
 # Speakeasy
 
+[![Hex.pm](http://img.shields.io/hexpm/v/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) [![Hex.pm](https://img.shields.io/hexpm/dw/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) ![Hex.pm](https://img.shields.io/hexpm/l/speakeasy.svg?style=flat)
+
 [Speakeasy](https://hexdocs.pm/speakeasy/readme.html) is middleware based authentication and authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard).
 
 [Docs](https://hexdocs.pm/speakeasy/readme.html)

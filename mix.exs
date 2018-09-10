@@ -52,7 +52,8 @@ defmodule Speakeasy.MixProject do
       {:absinthe, "~> 1.4"},
       {:absinthe_plug, "~> 1.4", optional: true},
       {:bodyguard, "~> 2.2"},
-      {:ex_doc, ">= 0.0.0", only: :dev}
+      {:ex_doc, "~> 0.19.1", only: [:dev, :docs], runtime: false},
+      {:inch_ex, only: :docs}
     ]
   end
 end

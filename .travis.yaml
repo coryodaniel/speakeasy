@@ -1,0 +1,20 @@
+language: elixir
+elixir:
+  - 1.6.6
+  - 1.7.3
+otp_release:
+  - 20.2
+sudo: false
+
+install:
+  - mix local.hex --force
+  - mix local.rebar --force
+  - mix deps.get
+
+# after_script:
+#   - MIX_ENV=docs mix deps.get
+#   - MIX_ENV=docs mix inch.report
+
+notifications:
+  recipients:
+    - travis@coryodaniel.com
