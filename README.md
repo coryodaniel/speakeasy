@@ -1,153 +1,134 @@
 # Speakeasy
 
-Middleware based authentication and authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard)
+[![Hex.pm](http://img.shields.io/hexpm/v/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) [![Hex.pm](https://img.shields.io/hexpm/dw/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) ![Hex.pm](https://img.shields.io/hexpm/l/speakeasy.svg?style=flat)
+
+[Speakeasy](https://hexdocs.pm/speakeasy/readme.html) is middleware based authentication and authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard).
+
+[Docs](https://hexdocs.pm/speakeasy/readme.html)
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+[Speakeasy](https://hex.pm/packages/speakeasy) can be installed
 by adding `speakeasy` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:speakeasy, "~> 0.2.1"}
+    {:speakeasy, "~> 0.3.0"}
   ]
 end
 ```
 
+## Configuration
+
+Configuration can be done in each Absinthe middleware call, but you can set global defaults as well.
+
+```elixir
+config :speakeasy,
+  user_key: :current_user,                # the key the current user will be under in the GraphQL context
+  authn_error_message: :unauthenticated  # default authentication failure message
+```
+
+_Note:_ no `authz_error_message` is provided because it is set from Bodyguard.
+
 ## Usage
 
-There are two ways to use Speakeasy to authorize GraphQL queries and mutations.
+**tl;dr:** A full example authentication, authorizing, loading, and resolving an Absinthe schema:
 
-Policies are just regular [Bodyguard](https://github.com/schrockwell/bodyguard) policies with two small changes:
+_This example assumes:_
 
-1.  Your `authorize/3` functions will receive the GraphQL `context` instead of a `user`. (Your context, probably includes the user).
-2.  Your policies are written for GraphQL queries and mutations rather than bounded contexts.
-
-```elixir
-defmodule MyAppWeb.Schema do
-  use Absinthe.Schema
-
-  def authorize(:create_post, %{current_user: user} = gql_context, post) do
-    IO.inspect(user)
-    IO.inspect(context)
-
-    # Return :ok or true to permit
-    # Return :error, {:error, reason}, or false to deny
-  end
-end
-```
-
-### Using Absinthe Middleware
-
-Absinthe supports a middleware stack that can be modified at the field or schema level.
-
-Below is an example of adding authentication and authorization to a GraphQL field.
+- You are authorizing a standard phoenix context
+- You already have a [bodyguard policy](https://github.com/schrockwell/bodyguard#policies)
+- Your `:current_user` is already in the Absinthe context _or_ you are using [`Speakeasy.Plug`](#speakeasy-plug)
 
 ```elixir
-defmodule MyAppWeb.Schema do
-  use Absinthe.Schema
+defmodule MyApp.Schema.PostTypes do
+  use Absinthe.Schema.Notation
+  alias Spectra.Posts
 
-  def authorize(:create_post, gql_context, post) do
-    # Return :ok or true to permit
-    # Return :error, {:error, reason}, or false to deny
+  object :post do
+    field(:id, non_null(:id))
+    field(:name, non_null(:string))
   end
 
-  mutation do
-    @desc "Create a post"
+  object :post_mutations do
+    @desc "Create post"
     field :create_post, type: :post do
-      middleware(Speakeasy.Authentication)
-      # Optionally you can pass an atom as the second argument to
-      # set the name of the key to use for checking the current user. The default is `:current_user`
-      # middleware(Speakeasy.Authentication, user_key: :current_user)
-      middleware(Speakeasy.Authorization)
+      arg(:name, non_null(:string))
+      middleware(Speakeasy.Authn)
+      middleware(Speakeasy.Authz, {Posts, :create_post})
+      middleware(Speakeasy.Resolve, &Posts.create_post/2)
+      middleware(MyApp.Middleware.ChangesetErrors) # :D
+    end
 
-      arg(:title, non_null(:string))
-      arg(:body, non_null(:string))
+    @desc "Update post"
+    field :update_post, type: :post do
+      arg(:name, non_null(:string))
+      middleware(Speakeasy.Authn)
+      middleware(Speakeasy.Authz, {Posts, :update_post})
+      middleware(Speakeasy.Resolve, &Posts.update_post/3)
+      middleware(MyApp.Middleware.ChangesetErrors) # :D
+    end
+  end
 
-      resolve(fn _, args, %{context: %{current_user: user}} ->
-        MyApp.Posts.create_post(args, user)
-      end)
+  object :post_queries do
+    @desc "Get posts"
+    field :posts, list_of(:post) do
+      middleware(Speakeasy.Authn)
+      middleware(Speakeasy.Resolve, fn(attrs, user) -> MyApp.Posts.search(attrs, user) end)
+    end
+
+    @desc "Get post"
+    field :post, type: :post do
+      arg(:id, non_null(:string))
+      middleware(Speakeasy.Authn)
+      middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+      middleware(Speakeasy.Authz, {Posts, :get_post})
+      middleware(Speakeasy.Resolve)
     end
   end
 end
 ```
 
-Alternatively you can use `defdelegate` to separate your schema and policy code:
+And of course you can use Absinthe's resolve function as well:
 
 ```elixir
-defmodule MyAppWeb.Schema.Policy do
-  def authorize(:create_post, gql_context, post) do
-    # Return :ok or true to permit
-    # Return :error, {:error, reason}, or false to deny
-  end
-end
-
-defmodule MyAppWeb.Schema do
-  use Absinthe.Schema
-  defdelegate authorize(action, user, params), to: MyAppWeb.Schema.Policy
-
-  mutation do
-    @desc "Create a post"
-    field :create_post, type: :post do
-      middleware(Speakeasy.Authentication)
-      middleware(Speakeasy.Authorization)
-
-      arg(:title, non_null(:string))
-      arg(:body, non_null(:string))
-
-      resolve(fn _, args, %{context: %{current_user: user}} ->
-        MyApp.Posts.create_post(args, user)
-      end)
-    end
-  end
+@desc "Get post"
+field :post, type: :post do
+  arg(:id, non_null(:string))
+  middleware(Speakeasy.Authn)
+  middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+  middleware(Speakeasy.Authz, {Posts, :get_post})
+  resolve(fn(_parent, _args, ctx) ->
+    {:ok, ctx[:speakeasy].resource}
+  end)
 end
 ```
 
-Check out the [documentation](https://hexdocs.pm/absinthe/Absinthe.Middleware.html) for more details on how to use Absinthe middleware.
+### Middleware
 
-### `Speakeasy.resolve/2` or `Speakeasy.resolve!/2`
+Speakeasy is a collection of Absinthe middleware:
 
-If you don't like the idea of defining your policies at the schema level, you can use `Speakeasy.resolve/2` or `Speakeasy.resolve!/2` in line with your field's resolve function and define policies on your bounded contexts instead.
+- [Speakeasy.Authn](https://hexdocs.pm/speakeasy/Speakeasy.Authn.html#content) - Resolution middleware for Absinthe.
+
+- [Speakeasy.LoadResource](https://hexdocs.pm/speakeasy/Speakeasy.LoadResource.html#content) - Loads a resource into the speakeasy context.
+
+- [Speakeasy.LoadResourceById](https://hexdocs.pm/speakeasy/Speakeasy.LoadResourceByID.html#content) - A convenience middleware to `LoadResource` using the `:id` in the Absinthe arguments.
+
+- [Speakeasy.AuthZ](https://hexdocs.pm/speakeasy/Speakeasy.Authz.html#content) - Authorization middleware for Absinthe.
+
+- [Speakeasy.Resolve](https://hexdocs.pm/speakeasy/Speakeasy.Resolve.html#content) - Resolution middleware for Absinthe.
+
+### Speakeasy.Plug
+
+Speakeasy includes a Plug for loading the current user into the Absinthe context. It isn't required if you already have a method for loading the user into your Absinthe context.
 
 ```elixir
-defmodule MyApp.Posts do
-  def authorize(:create_post, graphql_context, args) do
-    # Return :ok or true to permit
-    # Return :error, {:error, reason}, or false to deny
-  end
+defmodule MyAppWeb.Router do
+  use MyAppWeb, :router
 
-  def create_post(post, user) do
-    # Your logic here.
-  end
-end
-
-defmodule MyAppWeb.Schema do
-  use Absinthe.Schema
-
-  mutation do
-    @desc "Create a post"
-    field :create_post, type: :post do
-      # If the arity of `:create_post` is 2, it will receive the `post` arguments and the graphql `context`
-      resolve(Speakeasy.resolve(MyApp.Posts, :create_post))
-
-      # If you want to receive the `user` instead, pass `user_key: :the_key_you_stored_your_user_under`
-      # resolve(Speakeasy.resolve(MyApp.Posts, :create_post, user_key: :current_user))
-
-      # A convience atom is accepted `:user` that will default to returning the value of the context's `:current_user`
-      # resolve(Speakeasy.resolve(MyApp.Posts, :create_post, :user))
-
-      # Alternatively `resolve!/2` can be used for compile time checking that your resolution function supports the correct arity. It also accepts `:user_key`
-      # resolve(Speakeasy.resolve!(MyApp.Posts, :create_post))
-    end
+  pipeline :graphql do
+    plug(Speakeasy.Plug, load_user: &MyApp.Users.whoami/1, user_key: :current_user)
   end
 end
 ```
-
-If authorized `resolve/2` and `resolve!/2` will return an anonymous function to Absinthe's `resolve` function wrapping your resolution function (`MyApp.Posts.create_post` above).
-
-Speakeasy will provide different arguments depending on your resolution functions arity. For example:
-
-- `MyApp.Posts.list_post/0` - speakeasy will simply call this function
-- `MyApp.Posts.create_post/1` - speakeasy will call this function passing the GraphQL arguments
-- `MyApp.Posts.create_post/2` - speakeasy will call this function passing the GraphQL arguments as the first parameter and the GraphQL `context` _or_ `user` as the second depending on if `user_key` was provided.

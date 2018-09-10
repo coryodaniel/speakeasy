@@ -1,5 +1,4 @@
 all:
-	mix deps.get
-	mix format
-	mix docs
+	mix do clean, deps.get, compile
 	mix test
+	mix do format, docs
