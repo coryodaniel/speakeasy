@@ -19,7 +19,7 @@ defmodule Speakeasy.LoadResource do
 
   Handles loading a resource or resources and storing them in the `Speakeasy.Context` for later resolving.
 
-  Callback functions must return a type of: `any | {:ok, any} | {:error, error} | nil`
+  Callback functions must return a type of: `any | {:ok, any} | {:error, error} | nil`. It is effectively looking for the return signatures of Phoenix Contexts.
 
   ## Examples
     Loading a resource with a 1-arity function will receive the Absinthe arguments:

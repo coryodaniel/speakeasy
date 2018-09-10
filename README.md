@@ -31,6 +31,14 @@ _Note:_ no `authz_error_message` is provided because it is set from Bodyguard.
 
 Show a `posts` schema.
 
+```elixir
+resolve(fn(_p, args, ctx) ->
+  {:ok, ctx[:speakeasy].resource}
+end)
+
+vs Resolve
+```
+
 ### Middleware
 
 Speakeasy is a collection of Absinthe middlewares:

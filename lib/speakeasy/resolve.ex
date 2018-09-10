@@ -8,13 +8,64 @@ defmodule Speakeasy.Resolve do
   @behaviour Absinthe.Middleware
 
   @doc """
-  Update readme too...
+  The `Resolve` middleware will fetch a resource and mark the `Absinthe.Resolution` as resolved.
 
-  middleware(Speakeasy.Resolve) #=> {:ok, ctx[:speakeasy][:resource]}
-  middleware(Speakeasy.Resolve, fn(params) -> MyContext.whatever end)
-  middleware(Speakeasy.Resolve, fn(params, user) -> MyContext.whatever end)
-  middleware(Speakeasy.Resolve, fn(resource, params, user \\ nil) -> end)
-  middleware(Speakeasy.Resolve, &Albums.update_albums/3)
+  It expects a return signature of: `{any | {:ok, any}, {:errors, any}`
+
+  ## `Speakeasy.Resolve` has 4 forms:
+
+  ### No arguments
+
+    Providing no arguments to the callback will simply return the resource retreived by `Speakeasy.LoadResource` if it was called:
+
+      field :post, type: :post do
+        arg(:id, non_null(:string))
+        middleware(Speakeasy.Authn)
+        middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Resolve)
+      end
+
+  ### 1 arity function
+
+    Functions with an arity of 1 will receive the graph will receive the Absinthe arguments:
+
+      field :post, type: :post do
+        arg(:id, non_null(:string))
+        middleware(Speakeasy.Authn)
+        middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Resolve, fn(attrs) -> MyApp.Posts.something(attrs) end)
+      end
+
+  ### 2 arity function
+
+    This is a good form to use when creating a resource if your code takes the `user` in additional to the attributes.
+
+    Functions with an arity of 2 will receive the graph will receive the Absinthe arguments and the `SpeakEasy` current user:
+
+      field :post, type: :post do
+        arg(:id, non_null(:string))
+        middleware(Speakeasy.Authn)
+        middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Resolve, fn(attrs, user) -> MyApp.Posts.create_post(attrs, user) end)
+      end
+
+  ### 3 arity function
+
+    This is a good form to use when needing to update a resource.
+
+    Functions with an arity of 3 will receive the graph will receive the resource retreived by `Speakeasy.LoadResource` (if it was called), the Absinthe arguments, and the `SpeakEasy` current user:
+
+      field :post, type: :post do
+        arg(:id, non_null(:string))
+        middleware(Speakeasy.Authn)
+        middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Resolve, fn(resource, attrs, _user) -> MyApp.Posts.update_post(resource, attrs) end)
+        # middleware(Speakeasy.Resolve, &MyApp.Posts.update_posts/3)
+      end
   """
   def call(%{state: :unresolved} = res, fun) when is_function(fun) do
     call(res, resolver: fun)
