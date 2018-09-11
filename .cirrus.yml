@@ -1,0 +1,14 @@
+test_task:
+  container:
+    matrix:
+      image: elixir:1.6.6
+      image: elixir:1.7.3
+  install_script:
+    - mix local.hex --force
+    - mix local.rebar --force
+  mix_cache:
+    folder: deps
+    fingerprint_script: cat mix.lock
+    populate_script: mix deps.get
+  compile_script: mix compile
+  test_script: mix test
