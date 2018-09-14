@@ -1,8 +1,10 @@
 # Speakeasy
 
 [![Build Status](https://travis-ci.org/coryodaniel/speakeasy.svg?branch=master)](https://travis-ci.org/coryodaniel/speakeasy)
-[![Hex.pm](http://img.shields.io/hexpm/v/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) [![Hex.pm](https://img.shields.io/hexpm/dt/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) ![Hex.pm](https://img.shields.io/hexpm/l/speakeasy.svg?style=flat)
+[![Coverage Status](https://coveralls.io/repos/github/coryodaniel/speakeasy/badge.svg?branch=master)](https://coveralls.io/github/coryodaniel/speakeasy?branch=master)
+[![Hex.pm](http://img.shields.io/hexpm/v/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy) [![Hex.pm](https://img.shields.io/hexpm/dt/speakeasy.svg?style=flat)](https://hex.pm/packages/speakeasy)
 [![Documentation](https://img.shields.io/badge/documentation-on%20hexdocs-green.svg)](https://hexdocs.pm/speakeasy/)
+![Hex.pm](https://img.shields.io/hexpm/l/speakeasy.svg?style=flat)
 
 [Speakeasy](https://hexdocs.pm/speakeasy/readme.html) is middleware based authentication and authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard).
 
