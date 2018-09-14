@@ -53,7 +53,7 @@ defmodule Speakeasy.MixProject do
       {:absinthe_plug, "~> 1.4", optional: true},
       {:bodyguard, "~> 2.2"},
       {:ex_doc, "~> 0.19.1", only: [:dev, :docs], runtime: false},
-      {:inch_ex, only: :docs}
+      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test, :docs]}
     ]
   end
 end
