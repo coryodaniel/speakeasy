@@ -10,3 +10,14 @@ otp_release:
   - 20.3
 before_script:
   - mix deps.get --only test
+
+script: mix test
+
+after_script:
+  - MIX_ENV=test mix compile && mix coveralls.travis
+#   - MIX_ENV=docs mix deps.get
+#   - MIX_ENV=docs mix inch.report
+
+notifications:
+  recipients:
+    - travis@coryodaniel.com

@@ -12,6 +12,8 @@ defmodule Speakeasy.MixProject do
       description: description(),
       package: package(),
       name: "Speakeasy",
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
       docs: [
         extras: ["README.md"],
         main: "readme"
@@ -53,7 +55,8 @@ defmodule Speakeasy.MixProject do
       {:absinthe_plug, "~> 1.4", optional: true},
       {:bodyguard, "~> 2.2"},
       {:ex_doc, "~> 0.19.1", only: [:dev, :docs], runtime: false},
-      {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test, :docs]}
+      # {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test, :docs]},
+      {:excoveralls, "~> 0.8", only: [:test]}
     ]
   end
 end
