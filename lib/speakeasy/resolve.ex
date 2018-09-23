@@ -87,8 +87,7 @@ defmodule Speakeasy.Resolve do
     call(res, Enum.into(opts, %{}))
   end
 
-  def call(%{state: :unresolved, arguments: args} = res, %{resolver: fun})
-      when is_function(fun, 0) do
+  def call(%{state: :unresolved} = res, %{resolver: fun}) when is_function(fun, 0) do
     do_resolve(res, fun.())
   end
 
@@ -114,8 +113,6 @@ defmodule Speakeasy.Resolve do
   end
 
   def call(res, _), do: res
-
-  defp do_resolve(res, resources) when is_list(resources), do: %{res | state: :resolved, value: resources}
 
   defp do_resolve(res, {:ok, resource}), do: %{res | state: :resolved, value: resource}
 
