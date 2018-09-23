@@ -26,6 +26,18 @@ defmodule Speakeasy.Resolve do
         middleware(Speakeasy.Resolve)
       end
 
+  ### 0 arity function
+
+    Functions with an arity of 1 will receive the graph will receive the Absinthe arguments:
+
+      field :post, type: :post do
+        arg(:id, non_null(:string))
+        middleware(Speakeasy.Authn)
+        middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
+        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Resolve, fn() -> MyApp.Posts.list_posts() end)
+      end
+
   ### 1 arity function
 
     Functions with an arity of 1 will receive the graph will receive the Absinthe arguments:
@@ -76,6 +88,11 @@ defmodule Speakeasy.Resolve do
   end
 
   def call(%{state: :unresolved, arguments: args} = res, %{resolver: fun})
+      when is_function(fun, 0) do
+    do_resolve(res, fun.())
+  end
+
+  def call(%{state: :unresolved, arguments: args} = res, %{resolver: fun})
       when is_function(fun, 1) do
     do_resolve(res, fun.(args))
   end
@@ -97,6 +114,8 @@ defmodule Speakeasy.Resolve do
   end
 
   def call(res, _), do: res
+
+  defp do_resolve(res, resources) when is_list(resources), do: %{res | state: :resolved, value: resources}
 
   defp do_resolve(res, {:ok, resource}), do: %{res | state: :resolved, value: resource}
 
