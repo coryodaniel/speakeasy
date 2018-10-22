@@ -6,7 +6,7 @@
 [![Documentation](https://img.shields.io/badge/documentation-on%20hexdocs-green.svg)](https://hexdocs.pm/speakeasy/)
 ![Hex.pm](https://img.shields.io/hexpm/l/speakeasy.svg?style=flat)
 
-[Speakeasy](https://hexdocs.pm/speakeasy/readme.html) is middleware based authentication and authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard).
+[Speakeasy](https://hexdocs.pm/speakeasy/readme.html) is authentication agnostic middleware based authorization for [Absinthe](https://hexdocs.pm/absinthe) GraphQL powered by [Bodyguard](https://hexdocs.pm/bodyguard).
 
 [Docs](https://hexdocs.pm/speakeasy/readme.html)
 
