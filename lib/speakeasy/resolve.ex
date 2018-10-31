@@ -28,7 +28,7 @@ defmodule Speakeasy.Resolve do
 
   ### 0 arity function
 
-    Functions with an arity of 1 will receive the graph will receive the Absinthe arguments:
+    Functions with an arity of 0 will simply be called:
 
       field :post, type: :post do
         arg(:id, non_null(:string))
@@ -40,7 +40,7 @@ defmodule Speakeasy.Resolve do
 
   ### 1 arity function
 
-    Functions with an arity of 1 will receive the graph will receive the Absinthe arguments:
+    Functions with an arity of 1 will receive the Absinthe arguments:
 
       field :post, type: :post do
         arg(:id, non_null(:string))
