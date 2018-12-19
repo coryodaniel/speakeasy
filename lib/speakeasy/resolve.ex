@@ -35,7 +35,7 @@ defmodule Speakeasy.Resolve do
         middleware(Speakeasy.Authn)
         middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
         middleware(Speakeasy.Authz, {Posts, :get_post})
-        middleware(Speakeasy.Resolve, fn() -> MyApp.Posts.list_posts() end)
+        middleware(Speakeasy.Resolve, fn() -> MyApp.Posts.something() end)
       end
 
   ### 1 arity function
@@ -47,7 +47,7 @@ defmodule Speakeasy.Resolve do
         middleware(Speakeasy.Authn)
         middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
         middleware(Speakeasy.Authz, {Posts, :get_post})
-        middleware(Speakeasy.Resolve, fn(attrs) -> MyApp.Posts.something(attrs) end)
+        middleware(Speakeasy.Resolve, fn(attrs) -> MyApp.Posts.get_post(attrs) end)
       end
 
   ### 2 arity function
@@ -60,7 +60,7 @@ defmodule Speakeasy.Resolve do
         arg(:id, non_null(:string))
         middleware(Speakeasy.Authn)
         middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
-        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Authz, {Posts, :create_post})
         middleware(Speakeasy.Resolve, fn(attrs, user) -> MyApp.Posts.create_post(attrs, user) end)
       end
 
@@ -74,7 +74,7 @@ defmodule Speakeasy.Resolve do
         arg(:id, non_null(:string))
         middleware(Speakeasy.Authn)
         middleware(Speakeasy.LoadResourceByID, &Posts.get_post/1)
-        middleware(Speakeasy.Authz, {Posts, :get_post})
+        middleware(Speakeasy.Authz, {Posts, :update_posts})
         middleware(Speakeasy.Resolve, fn(resource, attrs, _user) -> MyApp.Posts.update_post(resource, attrs) end)
         # middleware(Speakeasy.Resolve, &MyApp.Posts.update_posts/3)
       end

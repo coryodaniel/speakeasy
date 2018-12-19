@@ -13,7 +13,7 @@ defmodule Speakeasy.MixProject do
       package: package(),
       name: "Speakeasy",
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test, "coveralls.html": :test],
+      preferred_cli_env: [coveralls: :test, "coveralls.html": :test, "coveralls.travis": :test],
       docs: [
         extras: ["README.md"],
         main: "readme"
