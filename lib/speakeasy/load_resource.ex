@@ -53,7 +53,7 @@ defmodule Speakeasy.LoadResource do
   end
 
   def call(%{state: :unresolved, arguments: args, context: ctx} = res, %{loader: loader}) do
-    case get_resource(loader, args, ctx[:speakeasy].user) do
+    case get_resource(loader, args, ctx[:speakeasy].user, ctx) do
       %{} = resource ->
         Speakeasy.Context.add_resource(res, resource)
 
@@ -77,7 +77,8 @@ defmodule Speakeasy.LoadResource do
   def call(%{state: :unresolved}, %{}), do: raise(ArgumentError, message: "`:loader` is required")
   def call(res, _), do: res
 
-  defp get_resource(fun, args, user) when is_function(fun, 2), do: fun.(args, user)
-  defp get_resource(fun, args, _user) when is_function(fun, 1), do: fun.(args)
-  defp get_resource(fun, _args, _user) when is_function(fun, 0), do: fun.()
+  defp get_resource(fun, args, user, ctx) when is_function(fun, 3), do: fun.(args, user, ctx)
+  defp get_resource(fun, args, user, _ctx) when is_function(fun, 2), do: fun.(args, user)
+  defp get_resource(fun, args, _user, _ctx) when is_function(fun, 1), do: fun.(args)
+  defp get_resource(fun, _args, _user, _ctx) when is_function(fun, 0), do: fun.()
 end
