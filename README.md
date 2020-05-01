@@ -119,6 +119,8 @@ Speakeasy is a collection of Absinthe middleware:
 
 - [Speakeasy.LoadResourceById](https://hexdocs.pm/speakeasy/Speakeasy.LoadResourceByID.html#content) - A convenience middleware to `LoadResource` using the `:id` in the Absinthe arguments.
 
+- [Speakeasy.LoadResourceBy](https://hexdocs.pm/speakeasy/Speakeasy.LoadResourceBy.html#content) - A convenience middleware to `LoadResource` using a value from the attrs with the given key in the Absinthe arguments.
+
 - [Speakeasy.AuthZ](https://hexdocs.pm/speakeasy/Speakeasy.Authz.html#content) - Authorization middleware for Absinthe.
 
 - [Speakeasy.Resolve](https://hexdocs.pm/speakeasy/Speakeasy.Resolve.html#content) - Resolution middleware for Absinthe.
