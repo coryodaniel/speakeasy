@@ -59,7 +59,7 @@ defmodule Speakeasy.Authz do
 
     case Bodyguard.permit(policy, action, speakeasy.user, resource_or_args) do
       :ok -> res
-      {:error, reason} -> Absinthe.Resolution.put_result(res, {:error, reason})
+      {:error, _} -> Absinthe.Resolution.put_result(res, {:error, default_error_message()})
     end
   end
 
@@ -67,4 +67,9 @@ defmodule Speakeasy.Authz do
     do: raise(ArgumentError, message: "`:authorizer` is required")
 
   def call(res, _), do: res
+
+  @doc false
+  def default_error_message() do
+    Application.get_env(:speakeasy, :authz_error_message)
+  end
 end
