@@ -32,4 +32,11 @@ defmodule Speakeasy.LoadResourceByIDTest do
 
     assert context == %Speakeasy.Context{resource: "Received ID: 3", user: "chauncy"}
   end
+
+  test "Doesn't do anything if the resolution is already resolved" do
+    resolution = %{mock_resolution() | state: :resolved}
+    loader = fn id -> {:ok, id} end
+
+    assert resolution == LoadResourceByID.call(resolution, loader)
+  end
 end
