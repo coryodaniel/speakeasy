@@ -34,4 +34,6 @@ defmodule Speakeasy.LoadResourceByID do
     options = Keyword.merge(opts, loader: load_resource_by_id)
     LoadResource.call(resolution, options)
   end
+
+  def call(res, _), do: res
 end
