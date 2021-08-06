@@ -4,7 +4,7 @@ defmodule Speakeasy.MixProject do
   def project do
     [
       app: :speakeasy,
-      version: "0.3.1",
+      version: "0.3.2",
       elixir: "~> 1.3",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -54,10 +54,8 @@ defmodule Speakeasy.MixProject do
       {:absinthe, "~> 1.4"},
       {:absinthe_plug, "~> 1.4", optional: true},
       {:bodyguard, "~> 2.2"},
-      {:ex_doc, "~> 0.18", only: [:dev, :docs], runtime: false},
-      # {:ex_doc, "~> 0.19.1", only: [:dev, :docs], runtime: false},
-      # {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test, :docs]},
-      {:excoveralls, "~> 0.8", only: [:test]}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.14", only: [:test]}
     ]
   end
 end

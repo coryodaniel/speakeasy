@@ -18,7 +18,7 @@ by adding `speakeasy` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:speakeasy, "~> 0.3.0"}
+    {:speakeasy, "~> 0.3"}
   ]
 end
 ```
