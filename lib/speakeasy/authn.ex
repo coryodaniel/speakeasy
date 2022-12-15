@@ -56,22 +56,41 @@ defmodule Speakeasy.Authn do
           middleware(Speakeasy.Authn, message: fn(_ctx) -> "Error message" end)
         end
       end
+
+    Allowing current_user to not be set, useful for calls that can both be authenticated and not:
+
+      object :post_mutations do
+        @desc "Create post"
+        field :create_post, type: :post do
+          arg(:name, non_null(:string))
+          middleware(Speakeasy.Authn, require: false)
+        end
+      end
   """
   @impl true
   def call(res, opts \\ [])
 
   def call(%{state: :unresolved} = res, opts) do
-    defaults = [user_key: Speakeasy.default_user_key(), error_message: default_error_message()]
+    defaults = [
+      user_key: Speakeasy.default_user_key(),
+      error_message: default_error_message(),
+      require: true
+    ]
+
     options = Keyword.merge(defaults, opts)
 
     user_key = options[:user_key]
+    require_current_user = options[:require]
     current_user = res.context[user_key]
 
-    case current_user do
-      nil ->
+    case {current_user, require_current_user} do
+      {_, false} ->
+        Speakeasy.Context.add_user(res, current_user)
+
+      {nil, true} ->
         Absinthe.Resolution.put_result(res, {:error, gen_msg(options[:error_message], res)})
 
-      _ ->
+      {_, true} ->
         Speakeasy.Context.add_user(res, current_user)
     end
   end
