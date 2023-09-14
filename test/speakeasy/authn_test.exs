@@ -47,6 +47,19 @@ defmodule Speakeasy.AuthnTest do
     assert result == %{context: %{}, errors: [:unauthenticated], state: :resolved}
   end
 
+  test "given a require: false config, allows the user context to not be present" do
+    resolution = %Absinthe.Resolution{
+      context: %{},
+      errors: [],
+      state: :unresolved
+    }
+
+    %Absinthe.Resolution{context: %{speakeasy: speakeasy}} =
+      Authn.call(resolution, require: false)
+
+    assert speakeasy == %Speakeasy.Context{resource: nil, user: nil}
+  end
+
   test "error message accepts a string" do
     resolution = %{context: %{}, errors: [], state: :unresolved}
 
